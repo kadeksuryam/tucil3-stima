@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.5.0/css/ol.css" type="text/css">
+    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.5.0/build/ol.js"></script>
+    <title>TUCIL STIMA 3</title>
+</head>
+<body>
+    <div class="topnav">
+        <a class="nav-item active" href="#home">Home</a>
+        <a class="nav-item" href="#about">About Us</a>
+    </div>
+    <div class="content active" id="home">
+      <div>WELCOME !</div>
+      <div class="form-group">
+          <label for="testcase">Masukkan Test Case (JSON): </label>
+          <input type="file" class="form-control-file" id="fileinput">
+      </div>
+      <input class="load-btn btn btn-primary" type="button" value="Load" onclick="loadFile();">
+      <div id="map" class="map"></div>
+      <div class="col-3 my-1 pil-node">
+        <p>Pencarian rute terpendendek: </p>
+        <label class="mr-sm-2" for="inlineFormCustomSelectNodeAwal">Node Awal</label>
+        <select class="custom-select pil-awal" id="inlineFormCustomSelectNodeAwal">
+        </select>
+        <label class="mr-sm-2" for="inlineFormCustomSelectNodeTujuan">Node Tujuan</label>
+        <select class="custom-select pil-akhir" id="inlineFormCustomSelectNodeTujuan">
+        </select>
+        <input class="btn btn-primary pil-node-submit" type="button" value="Submit" onclick="handleSubmitPilForm()">
+        <div class="path"></div> 
+      </div>
+    </div>
+    <div class="content" id="about">
+      <p>About Us</p>
+      <p>I Gede Govindabhakta	(13519139)</p>
+      <p>Kadek Surya Mahardika (13519165)</p>
+    </div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="main.js"></script>
+<script src="style.js"></script>
+</html>
