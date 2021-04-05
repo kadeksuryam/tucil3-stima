@@ -1,6 +1,9 @@
-/* Implementasi map */
-let nodeInfo
-let adjMatrix
+/* Essential Variable  */
+let nodeInfo; //Array of Object, berisi informasi detail setiap node
+let adjMatrix; //Matrix nxn, berisi integer 0/1
+let pilAwalNode; //string, pilihan node awal
+let pilAkhirNode; //string, pilihan node akhir
+
 function loadFile() {
   let input, file, fr;
 
@@ -10,6 +13,7 @@ function loadFile() {
     return;
   }
 
+  /* Cek kondisi input file kontainer */
   input = document.getElementById('fileinput');
   if (!input) {
     alert("Um, couldn't find the fileinput element.");
@@ -41,18 +45,17 @@ function loadFile() {
       document.getElementsByClassName('pil-node')[0].style.display = 'block';
       document.getElementsByClassName('pil-awal')[0].innerHTML = '';
       document.getElementsByClassName('pil-akhir')[0].innerHTML = '';
-      /* Draw the map */
-      handleMap(nodeInfo, adjMatrix);
+      /* Inisialisasi map (node-node pada lan lon berkaitan ditandai) */
+      initMap();
 
       /* handle node form */
-      handleNodePilForm(nodeInfo, adjMatrix);
+      handleNodePilForm();
     }
   }
 }
 
 /* Map routine */
-function handleMap(nodeInfo, adjMatrix){
-  /* Handle Map */
+function initMap(){
   let map = new ol.Map({
     target: 'map',
     layers: [
@@ -70,8 +73,13 @@ function handleMap(nodeInfo, adjMatrix){
   })
 }
 
+function drawPath(){
+
+}
+
+
 /* Node form routine */
-function handleNodePilForm(nodeInfo, adjMatrix){
+function handleNodePilForm(){
   let pilAwal = document.getElementsByClassName('pil-awal')[0];
   let pilAkhir = document.getElementsByClassName('pil-akhir')[0];
   pilAwal.innerHTML += `<option selected="">Pilih Node Awal...</option>`
@@ -82,9 +90,113 @@ function handleNodePilForm(nodeInfo, adjMatrix){
   } 
 }
 
+function handleSubmitPilForm(){
+  pilAwalNode = document.getElementsByClassName('pil-awal')[0].value;
+  pilAkhirNode = document.getElementsByClassName('pil-akhir')[0].value;
+
+  //panggil algoritma A* dan gambarkan lintasannya di map
+}
+
+/* =========================== MAIN ALGORITHM ================================ */
+/* Implementasi A* Algorithm */
+/* fScore(n) = gScore(n) + hScore(n) */
+/* gScore(n) adalah jarak dari node awal ke node n */
+/* hScore(n) adalah jarak euclidean dari node node n ke tujuan */
+
+//tc1, rute terpendeknya harusnya : 1 -> 5 -> 4
+
+/* cameForm : Map, currNode : string */
+function reconstruct_path(cameFrom, currNode){
+  total_path = [currNode];
+  while(cameFrom.has(currNode)){
+    currNode = cameFrom.get(currNode);
+    total_path.unshift(currNode);
+  }
+  return total_path;
+}
+
+/* start, goal : string, h : function */
+function A_Star(start, goal, h){
+  const INF = 1000000007;
+  openSet = new PriorityQueue();
+
+  // For node n, cameFrom[n] is the node immediately preceding it on the cheapest path from start
+  // to n currently known.
+  cameFrom = new Map(String, String);
+
+  // For node n, gScore[n] is the cost of the cheapest path from start to n currently known.
+  gScore = new Map(String, Number);
+  //Initialize all gScore for all node to be Infinity
+  for(let i=0;i<adjMatrix.length;i++) gScore.set((i+1).toString(), INF);
+  gScore.set(start, 0);
+
+  // For node n, fScore[n] := gScore[n] + h(n). fScore[n] represents our current best guess as to
+  // how short a path from start to finish can be if it goes through n.
+  fScore = new Map(String, Number);
+  fScore.set(start, h(start));
+
+  //masukkan node awal ke queue
+  //setiap node berbentuk objek Node {"namaNode", "priority"}
+  //priority adalah fScore
+  openSet.enqueue(new Node(start, fScore.get(start)));
+  
+  while(openSet.values.length !== 0){
+    // This operation can occur in O(1) time if openSet is a min-heap or a priority queue
+    currNode = openSet.values[0];
+    if(currNode.value == goal)
+      return reconstruct_path(cameFrom, currNode.value);
+
+    openSet.dequeue();
+    for(let i=0;i<adjMatrix[parseInt(start)];i++){
+      if(adjMatrix[parseInt(start)][i]) {
+        let neighbor = (i+1).toString();
+        tentative_gScore = gScore.get(currNode.value) + haversineDist(currNode.value, neighbor);
+        if(tentative_gScore < gScore.get(neighbor)){
+          cameFrom.set(neighbor, currNode.id);
+          gScore.set(neighbor, tentative_gScore);
+          fScore.set(neighbor, gscore.get(neighbor)+h(neighbor));
+          let isInOpenSet = function(node){
+            openSet.values.forEach(element => {
+              if(element.value === node) return true;
+            });
+            return false;
+          }
+          if(!(isInOpenSet(neighbor))) openSet.enqueue(neighbor);
+        }  
+      }
+    }
+  }
+  return -1;
+}
 
 
-/* Priority Queue, Data Struktur */
+function haversineDist(currNode){
+ Number.prototype.toRad = function() {
+    return this * Math.PI / 180;
+ }
+ 
+  let lat2 = nodeInfo[parseInt(pilAkhirNode)-1].lat; 
+  let lon2 = nodeInfo[parseInt(pilAkhirNode)-1].lon; 
+  let lat1 = nodeInfo[parseInt(currNode)-1].lat; 
+  let lon1 = nodeInfo[parseInt(currNode)-1].lon; 
+  
+  var R = 6371; // km 
+
+  var x1 = lat2-lat1;
+  var dLat = x1.toRad();  
+  var x2 = lon2-lon1;
+  var dLon = x2.toRad();  
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) + 
+                  Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) * 
+                  Math.sin(dLon/2) * Math.sin(dLon/2);  
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  var d = R * c; 
+  
+  return d;
+}
+
+
+/* Data Struktur, Priority Queue */
 class Node{
   constructor(value, priority){
       this.value = value
@@ -189,99 +301,4 @@ class PriorityQueue{
       
       return poppedNode;
   }
-}
-
-/* Implementasi A* Algorithm */
-/* fScore(n) = gScore(n) + hScore(n) */
-/* gScore(n) adalah jarak dari node awal ke node n */
-/* hScore(n) adalah jarak euclidean dari node node n ke tujuan */
-
-//tc1, rute terpendeknya harusnya : 1 -> 5 -> 4
-
-function reconstruct_path(cameFrom, currNode){
-  total_path = [currNode];
-  while(cameFrom.has(currNode)){
-    currNode = cameFrom.get(currNode);
-    total_path.unshift(currNode);
-  }
-  return total_path;
-}
-
-function A_Star(start, goal, h){
-  const INF = 1000000007;
-  openSet = new PriorityQueue();
-
-  // For node n, cameFrom[n] is the node immediately preceding it on the cheapest path from start
-  // to n currently known.
-  cameFrom = new Map(String, String);
-
-  // For node n, gScore[n] is the cost of the cheapest path from start to n currently known.
-  gScore = new Map(String, Number);
-  //Initialize all gScore for all node to be Infinity
-  for(let i=0;i<adjMatrix.length;i++) gScore.set((i+1).toString(), INF);
-  gScore.set(start, 0);
-
-  // For node n, fScore[n] := gScore[n] + h(n). fScore[n] represents our current best guess as to
-  // how short a path from start to finish can be if it goes through n.
-  fScore = new Map(String, Number);
-  fScore.set(start, h(start));
-
-  //masukkan node awal ke queue
-  //setiap node berbentuk objek Node {"namaNode", "priority"}
-  //priority adalah fScore
-  openSet.enqueue(new Node(start, fScore.get(start)));
-  
-  while(openSet.values.length !== 0){
-    // This operation can occur in O(1) time if openSet is a min-heap or a priority queue
-    currNode = openSet.values[0];
-    if(currNode.id == goal)
-      return reconstruct_path(cameFrom, currNode.id);
-
-    currNode.dequeue();
-    for(let i=0;i<adjMatrix[parseInt(start)];i++){
-      if(adjMatrix[i]) {
-        let neighbor = (i+1).toString();
-        tentative_gScore = gScore.get(currNode.id) + haversineDist(currNode.id, neighbor);
-        if(tentative_gScore < gScore.get(neighbor)){
-          cameFrom.set(neighbor, currNode.id);
-          gScore.set(neighbor, tentative_gScore);
-          fScore.set(neighbor, gscore.get(neighbor)+h(neighbor));
-          let isInOpenSet = function(node){
-            openSet.values.forEach(element => {
-              if(element.value === node) return true;
-            });
-            return false;
-          }
-          if(!(isInOpenSet(neighbor))) openSet.enqueue(neighbor);
-        }  
-      }
-    }
-  }
-  return -1;
-}
-
-
-function haversineDist(currNode, neighbor){
- Number.prototype.toRad = function() {
-    return this * Math.PI / 180;
- }
- 
-  let lat2 = 42.741; 
-  let lon2 = -71.3161; 
-  let lat1 = 42.806911; 
-  let lon1 = -71.290611; 
-  
-  var R = 6371; // km 
-
-  var x1 = lat2-lat1;
-  var dLat = x1.toRad();  
-  var x2 = lon2-lon1;
-  var dLon = x2.toRad();  
-  var a = Math.sin(dLat/2) * Math.sin(dLat/2) + 
-                  Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) * 
-                  Math.sin(dLon/2) * Math.sin(dLon/2);  
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  var d = R * c; 
-  
-  return d;
 }
