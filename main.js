@@ -1,9 +1,10 @@
 /* Implementasi map */
-var mapInfo
-var adjMatrix
+let nodeInfo
+let adjMatrix
 function loadFile() {
-  var input, file, fr;
+  let input, file, fr;
 
+  /* Load testcase (JSON) dengan FileReader  */
   if (typeof window.FileReader !== 'function') {
     alert("The file API isn't supported on this browser yet.");
     return;
@@ -26,28 +27,61 @@ function loadFile() {
     fr.readAsText(file);
   }
 
+  /* Callback loaded JSON */
   function receivedText(e) {
     let lines = e.target.result;
     console.log(lines);
+    /* Simpan data testcase di variabel global nodeInfo dan adjMatrix */
     mapInfo = JSON.parse(lines.toString()); 
-    //console.log(newArr);
-    var map = new ol.Map({
-      target: 'map',
-      layers: [
-        new ol.layer.Tile({
-          source: new ol.source.OSM()
-        })
-      ],
-      view: new ol.View({
-        center: ol.proj.fromLonLat([1333508158425.6594, -772229.4153715803]),
-        zoom: 7
-      })
-    });
-    map.on('click', function(e){
-      console.log(e.coordinate);
-    })
+    nodeInfo = mapInfo.nodeInfo;
+    adjMatrix = mapInfo.adjMatrix;
+  
+    if(!(document.getElementById('map').childNodes.length)){
+      document.getElementsByClassName('map')[0].style.display = 'block';
+      document.getElementsByClassName('pil-node')[0].style.display = 'block';
+      document.getElementsByClassName('pil-awal')[0].innerHTML = '';
+      document.getElementsByClassName('pil-akhir')[0].innerHTML = '';
+      /* Draw the map */
+      handleMap(nodeInfo, adjMatrix);
+
+      /* handle node form */
+      handleNodePilForm(nodeInfo, adjMatrix);
+    }
   }
 }
+
+/* Map routine */
+function handleMap(nodeInfo, adjMatrix){
+  /* Handle Map */
+  let map = new ol.Map({
+    target: 'map',
+    layers: [
+      new ol.layer.Tile({
+        source: new ol.source.OSM()
+      })
+    ],
+    view: new ol.View({
+      center: ol.proj.fromLonLat([37.41, 8.82]),
+      zoom: 4
+    })
+  });
+  map.on('click', function(e){
+    console.log(e.coordinate);
+  })
+}
+
+/* Node form routine */
+function handleNodePilForm(nodeInfo, adjMatrix){
+  let pilAwal = document.getElementsByClassName('pil-awal')[0];
+  let pilAkhir = document.getElementsByClassName('pil-akhir')[0];
+  pilAwal.innerHTML += `<option selected="">Pilih Node Awal...</option>`
+  pilAkhir.innerHTML += '<option selected="">Pilih Node Akhir...</option>'
+  for(let i=1;i<=adjMatrix.length;i++){
+    pilAwal.innerHTML += `<option value="${i}">${i.toString()}</option>`
+    pilAkhir.innerHTML += `<option value="${i}">${i.toString()}</option>`
+  } 
+}
+
 
 
 /* Priority Queue, Data Struktur */
@@ -162,6 +196,8 @@ class PriorityQueue{
 /* gScore(n) adalah jarak dari node awal ke node n */
 /* hScore(n) adalah jarak euclidean dari node node n ke tujuan */
 
+//tc1, rute terpendeknya harusnya : 1 -> 5 -> 4
+
 function reconstruct_path(cameFrom, currNode){
   total_path = [currNode];
   while(cameFrom.has(currNode)){
@@ -205,7 +241,7 @@ function A_Star(start, goal, h){
     for(let i=0;i<adjMatrix[parseInt(start)];i++){
       if(adjMatrix[i]) {
         let neighbor = (i+1).toString();
-        tentative_gScore = gScore.get(currNode.id) + euclideanDist(currNode.id, neighbor);
+        tentative_gScore = gScore.get(currNode.id) + haversineDist(currNode.id, neighbor);
         if(tentative_gScore < gScore.get(neighbor)){
           cameFrom.set(neighbor, currNode.id);
           gScore.set(neighbor, tentative_gScore);
@@ -222,4 +258,30 @@ function A_Star(start, goal, h){
     }
   }
   return -1;
+}
+
+
+function haversineDist(currNode, neighbor){
+ Number.prototype.toRad = function() {
+    return this * Math.PI / 180;
+ }
+ 
+  let lat2 = 42.741; 
+  let lon2 = -71.3161; 
+  let lat1 = 42.806911; 
+  let lon1 = -71.290611; 
+  
+  var R = 6371; // km 
+
+  var x1 = lat2-lat1;
+  var dLat = x1.toRad();  
+  var x2 = lon2-lon1;
+  var dLon = x2.toRad();  
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) + 
+                  Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) * 
+                  Math.sin(dLon/2) * Math.sin(dLon/2);  
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  var d = R * c; 
+  
+  return d;
 }
