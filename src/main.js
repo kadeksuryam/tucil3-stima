@@ -59,21 +59,25 @@ function loadFile() {
 
 /* Map routine */
 function initMap(){
-  let map = new ol.Map({
-    target: 'map',
-    layers: [
-      new ol.layer.Tile({
-        source: new ol.source.OSM()
-      })
-    ],
-    view: new ol.View({
-      center: ol.proj.fromLonLat([37.41, 8.82]),
-      zoom: 4
-    })
-  });
-  map.on('click', function(e){
-    console.log(e.coordinate);
-  })
+  let myMap = L.map('map').setView(new L.LatLng(parseFloat(nodeInfo[0].lat), parseFloat(nodeInfo[0].lon)), 15);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(myMap);
+
+  nodeInfo.forEach(function(info) {
+    L.marker([parseFloat(info.lat), parseFloat(info.lon)]).addTo(myMap).bindPopup(`${info.id}`);
+  }); 
+  /*
+  L.marker([-6.927145, 107.603657]).addTo(myMap)
+    .bindPopup('Node Awal')
+    .openPopup(); */
+  function lngLatArrayToLatLng(lngLatArray) {
+    return lngLatArray.map(lngLatToLatLng);
+  }
+  function lngLatToLatLng(lngLat) {
+    return [lngLat[1], lngLat[0]];
+  }
 }
 
 function drawPath(path){
