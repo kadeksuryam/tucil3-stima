@@ -25,6 +25,8 @@ function setActiveContent(idName){
         else{
             contentClass[i].className = 'content active';
             contentClass[i].style.display = 'block';
+            if(contentClass[i].id != 'home') document.getElementsByClassName('pil-node')[0].style.display = 'none';
+            else document.getElementsByClassName('pil-node')[0].style.display = 'block';
         }
     }
 }
@@ -32,7 +34,6 @@ function setActiveContent(idName){
 function init(){
     document.getElementsByClassName('content active')[0].style.display = 'block';
     document.getElementsByClassName('map')[0].style.display = 'none';
-    document.getElementsByClassName('pil-node')[0].style.display = 'none';
 }
 
 /* Main Function */
