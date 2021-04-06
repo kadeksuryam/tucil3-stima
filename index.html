@@ -21,30 +21,122 @@
         <a class="nav-item active" href="#home">Home</a>
         <a class="nav-item" href="#about">About Us</a>
     </div>
-    <div class="content active" id="home">
-      <div>WELCOME !</div>
-      <div class="form-group">
-          <label for="testcase">Masukkan Test Case (JSON): </label>
-          <input type="file" class="form-control-file" id="fileinput">
+
+    <div class="container-fluid">
+      <div class="content active" id="home">
+        <div class="row">
+          <div class="col-12">
+            <h1>WELCOME!</h1>
+          </div>
+        </div>
+
+        <!-- input file -->
+        <div class="row">
+          <div class="col-6">
+            <div class="form-group">
+              <label for="testcase">Masukkan Test Case (JSON): </label>
+
+              <div class="row">
+                <div class="col-6">
+                  <input type="file" class="form-control-file" id="fileinput">
+                </div>
+
+                <div class="col-6">
+                  <input class="load-btn btn btn-primary" type="button" value="Load" onclick="loadFile();">
+                  <button class="btn btn-primary">Save Current Map</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+
+        <!-- map -->
+        <div class="container"></div>
+          <div class="row">
+            <div class="col-8">
+              <div id="map" class="map"></div>      
+            </div>
+    
+            <div class="col-4">
+              <div class="container-fluid">
+                <div class="row">
+                  <div class="col-12">
+                    <input type="text" class="form-control" placeholder="Click-and-Drag to relocate Node, Double-click to add new Node" readonly>
+                  </div>
+                </div>
+                
+                <div class="row" style="margin-top: 10px;">
+                  <!-- select new path start -->
+                  <div class="col-4">
+                    <label class="mr-sm-2" for="newPathStart">New Path Start</label>
+                    <select class="custom-select path-awal" id="selectNewPathStart">
+                    </select>
+                  </div>
+                  
+                  <!-- select new path end -->
+                  <div class="col-4">
+                    <label class="mr-sm-2" for="newPathEnd">New Path End</label>
+                    <select class="custom-select path-akhir" id="selectnewPathEnd">
+                    </select>
+                  </div> 
+
+                  <!-- set new path weight -->
+                  <div class="col-4">
+                    <label class="mr-sm-2" for="newPathEnd">New Path Weight</label>
+                    <input type="number" class="custom-select path-weight" id="newPathWeight" placeholder="Weight" value="1">
+                    </select>
+                  </div>
+                </div>
+                
+                <!-- list of paths -->
+                <div class="row">
+                  <div class="col-6 pathlist">
+                      
+                  </div>
+                </div>
+              </div> 
+            </div>
+          </div>
+        </div>
+
+        <!-- a* options -->
+        <div class="col-12 my-1 pil-node">
+          <p>Pencarian rute terpendendek: </p>
+
+          <div class="row">
+            <!-- pilih node awal -->
+            <div class="col-4">
+              <label class="mr-sm-2" for="inlineFormCustomSelectNodeAwal">Node Awal</label>
+              <select class="custom-select pil-awal" id="inlineFormCustomSelectNodeAwal">
+              </select>
+            </div>
+            
+            <!-- pilih node tujuan -->
+            <div class="col-4">
+              <label class="mr-sm-2" for="inlineFormCustomSelectNodeTujuan">Node Tujuan</label>
+              <select class="custom-select pil-akhir" id="inlineFormCustomSelectNodeTujuan">
+              </select>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top: 10px;">
+            <div class="col-8">
+              <input class="btn btn-primary pil-node-submit" type="button" value="Submit" onclick="handleSubmitPilForm()">
+            </div>
+          </div>
+
+          <!-- do a* -->
+          <div class="path"></div> 
+        </div>
+
       </div>
-      <input class="load-btn btn btn-primary" type="button" value="Load" onclick="loadFile();">
-      <div id="map" class="map"></div>
-      <div class="col-3 my-1 pil-node">
-        <p>Pencarian rute terpendendek: </p>
-        <label class="mr-sm-2" for="inlineFormCustomSelectNodeAwal">Node Awal</label>
-        <select class="custom-select pil-awal" id="inlineFormCustomSelectNodeAwal">
-        </select>
-        <label class="mr-sm-2" for="inlineFormCustomSelectNodeTujuan">Node Tujuan</label>
-        <select class="custom-select pil-akhir" id="inlineFormCustomSelectNodeTujuan">
-        </select>
-        <input class="btn btn-primary pil-node-submit" type="button" value="Submit" onclick="handleSubmitPilForm()">
-        <div class="path"></div> 
+      <div class="content" id="about">
+        <p>About Us</p>
+        <p>I Gede Govindabhakta	(13519139)</p>
+        <p>Kadek Surya Mahardika (13519165)</p>
       </div>
-    </div>
-    <div class="content" id="about">
-      <p>About Us</p>
-      <p>I Gede Govindabhakta	(13519139)</p>
-      <p>Kadek Surya Mahardika (13519165)</p>
     </div>
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
