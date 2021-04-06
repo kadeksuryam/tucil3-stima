@@ -1,9 +1,68 @@
 /* Essential Variable  */
-let nodeInfo; //Array of Object, berisi informasi detail setiap node
-let adjMatrix; //Matrix nxn, berisi integer 0/1
+let nodeInfo = []; //Array of Object, berisi informasi detail setiap node
+let adjMatrix = []; //Matrix nxn, berisi integer 0/1
 let pilAwalNode; //string, pilihan node awal
 let pilAkhirNode; //string, pilihan node akhir
-let graphWeight; // matrix nxn, jarak suatu node dengan tetangga-tetanggannya
+let graphWeight = []; // matrix nxn, jarak suatu node dengan tetangga-tetanggannya
+let myMap;
+
+let markers = [];
+
+window.onload = function()
+{
+  document.getElementsByClassName('map')[0].style.display = 'block';
+  document.getElementsByClassName('pil-node')[0].style.display = 'block';
+
+  myMap = L.map('map').setView([-6.819134, 107.61065], 15);
+  myMap.doubleClickZoom.disable();
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(myMap);
+
+  /* Add node on double click */
+  myMap.on('dblclick', function(e)
+  {
+    let marker = L.marker(e.latlng, {draggable: 'true'});
+    
+    let newNode = {"id": (nodeInfo.length+1).toString(), "nama": "", "lat": e.latlng.lat, "lon": e.latlng.lng};
+    marker.bindPopup(`${newNode.id}`);
+    marker.id = newNode.id;
+    myMap.addLayer(marker);
+    
+    marker.on('dragend', function()
+    {
+      console.log("New lat len is", marker.getLatLng());
+      nodeInfo[marker.id].lat = marker.getLatLng().lat;
+      nodeInfo[marker.id].lng = marker.getLatLng().lng;
+      console.log("New marker is", nodeInfo[marker.id]);
+    });
+
+    markers.push(marker);
+    nodeInfo.push(newNode);
+
+    let newRow = [];
+    let newWeight = [];
+
+    for(let i = 0; i < adjMatrix.length; i++)
+    {
+      adjMatrix[i].push(0);
+      graphWeight[i].push(1);
+      newRow.push(0);
+      newWeight.push(1);
+    }
+    newRow.push(1);
+    newWeight.push(0);
+    adjMatrix.push(newRow);
+    graphWeight.push(newWeight);
+
+    handleNodePilForm();
+
+
+    return e;
+  })
+
+}
 
 /* Subroutine untuk load testcase, format file : JSON */
 function loadFile() {
@@ -61,20 +120,60 @@ function loadFile() {
       /* handle node form */
       handleNodePilForm();
     }
+
+    /* Inisialisasi map (node-node pada lan lon berkaitan ditandai) */
+    initMap();
+
+    /* handle node form */
+    handleNodePilForm();
   }
+}
+
+/* Subroutine untuk save data yang ditampilkan ke file json baru */
+function saveFile()
+{
+  let saveObject;
+  saveObject.nodeInfo = nodeInfo;
+  saveObject.adjMatrix = adjMatrix;
+  saveObject.weight = graphWeight;
+
+  let dataHref = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(saveObject)); 
 }
 
 /* Subroutine untuk inisialisasi map */
 function initMap(){
-  let myMap = L.map('map').setView(new L.LatLng(parseFloat(nodeInfo[0].lat), parseFloat(nodeInfo[0].lon)), 15);
+  for(let i = 0; i < markers.length; i++)
+  {
+    myMap.removeLayer(markers[i]);
+  }
+  markers = [];
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(myMap);
+  myMap.flyTo([parseFloat(nodeInfo[0].lat), parseFloat(nodeInfo[0].lon)], 15);
 
+  // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  //   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  // }).addTo(myMap);
+
+  let i = 1;
   nodeInfo.forEach(function(info) {
-    L.marker([parseFloat(info.lat), parseFloat(info.lon)]).addTo(myMap).bindPopup(`${info.id}`);
+    let marker = L.marker([parseFloat(info.lat), parseFloat(info.lon)], {draggable: 'true'});
+    marker.id = i;
+    i++;
+    marker.bindPopup(`${info.id}`);
+    myMap.addLayer(marker);
+
+    marker.on('dragend', function()
+    {
+      console.log("New lat len is", marker.getLatLng());
+      nodeInfo[marker.id].lat = marker.getLatLng().lat;
+      nodeInfo[marker.id].lng = marker.getLatLng().lng;
+      console.log("New marker is", nodeInfo[marker.id]);
+    });
+
+    markers.push(marker);
   }); 
+  
+
   /*
   L.marker([-6.927145, 107.603657]).addTo(myMap)
     .bindPopup('Node Awal')
@@ -82,6 +181,7 @@ function initMap(){
   function lngLatArrayToLatLng(lngLatArray) {
     return lngLatArray.map(lngLatToLatLng);
   }
+
   function lngLatToLatLng(lngLat) {
     return [lngLat[1], lngLat[0]];
   }
@@ -95,14 +195,28 @@ function drawPath(path){
 
 /* Subroutine untuk form pemilihan node awal-akhir */
 function handleNodePilForm(){
+  let newPilStart = document.getElementsByClassName('path-awal')[0];
+  let newPillEnd = document.getElementsByClassName('path-akhir')[0];
+
+  newPilStart.innerHTML = '';
+  newPillEnd.innerHTML = '';
+  // newPilStart.innerHTML += `<option selected="">New Path Start</option>`
+  // newPillEnd.innerHTML += '<option selected="">New Path End</option>'
+  for(let i=1;i<=adjMatrix.length;i++){
+    newPilStart.innerHTML += `<option value="${i}">${i.toString()}</option>`
+    newPillEnd.innerHTML += `<option value="${i}">${i.toString()}</option>`
+  } 
+
   let pilAwal = document.getElementsByClassName('pil-awal')[0];
   let pilAkhir = document.getElementsByClassName('pil-akhir')[0];
-  pilAwal.innerHTML += `<option selected="">Pilih Node Awal...</option>`
-  pilAkhir.innerHTML += '<option selected="">Pilih Node Akhir...</option>'
+  // pilAwal.innerHTML += `<option selected="">Pilih Node Awal...</option>`
+  // pilAkhir.innerHTML += '<option selected="">Pilih Node Akhir...</option>'
+  pilAwal.innerHTML = '';
+  pilAkhir.innerHTML = '';
   for(let i=1;i<=adjMatrix.length;i++){
     pilAwal.innerHTML += `<option value="${i}">${i.toString()}</option>`
     pilAkhir.innerHTML += `<option value="${i}">${i.toString()}</option>`
-  } 
+  }
 }
 
 /* Subroutine untuk handling submission form pemilihan node awal-akhir */
@@ -219,6 +333,8 @@ function A_Star(start, goal, h){
 
 
 function haversineDist(currNode){
+
+  console.log(nodeInfo)
 
   let lat2 = nodeInfo[parseInt(pilAkhirNode)-1].lat; 
   let lon2 = nodeInfo[parseInt(pilAkhirNode)-1].lon; 
@@ -348,3 +464,4 @@ class PriorityQueue{
       return poppedNode;
   }
 }
+
