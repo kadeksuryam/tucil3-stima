@@ -3,29 +3,33 @@ let nodeInfo; //Array of Object, berisi informasi detail setiap node
 let adjMatrix; //Matrix nxn, berisi integer 0/1
 let pilAwalNode; //string, pilihan node awal
 let pilAkhirNode; //string, pilihan node akhir
-let graphWeight;
+let graphWeight; // matrix nxn, jarak suatu node dengan tetangga-tetanggannya
 
+/* Subroutine untuk load testcase, format file : JSON */
 function loadFile() {
   let input, file, fr;
 
-  /* Load testcase (JSON) dengan FileReader  */
+  /* Beberapa browser mungkin tidak mendukung FileReader API  */
   if (typeof window.FileReader !== 'function') {
     alert("The file API isn't supported on this browser yet.");
     return;
   }
 
-  /* Cek kondisi input file kontainer */
   input = document.getElementById('fileinput');
   if (!input) {
+    /* Tidak ditemukannya objek element 'fileinput' pada DOM Tree */
     alert("Um, couldn't find the fileinput element.");
   }
   else if (!input.files) {
+    /* Browser tidak support `files` property */
     alert("This browser doesn't seem to support the `files` property of file inputs.");
   }
   else if (!input.files[0]) {
+    /* Jika user mengklik load button sebelum memilih testcase */
     alert("Please select a file before clicking 'Load'");
   }
   else {
+    /* Baca file dan proses callback saat file diload pada fungsi recievedText */
     file = input.files[0];
     fr = new FileReader();
     fr.onload = receivedText;
@@ -35,13 +39,16 @@ function loadFile() {
   /* Callback loaded JSON */
   function receivedText(e) {
     let lines = e.target.result;
-    console.log(lines);
+    //console.log(lines);
     /* Simpan data testcase di variabel global nodeInfo dan adjMatrix */
+    
+    /* Inisialisasi Variabel Essential */
     mapInfo = JSON.parse(lines.toString()); 
     nodeInfo = mapInfo.nodeInfo;
     adjMatrix = mapInfo.adjMatrix;
     graphWeight = mapInfo.weight;
   
+    /* Ketika sudah ada map yang terload, tidak perlu di load lagi  */
     if(!(document.getElementById('map').childNodes.length)){
       document.getElementsByClassName('map')[0].style.display = 'block';
       document.getElementsByClassName('pil-node')[0].style.display = 'block';
@@ -57,7 +64,7 @@ function loadFile() {
   }
 }
 
-/* Map routine */
+/* Subroutine untuk inisialisasi map */
 function initMap(){
   let myMap = L.map('map').setView(new L.LatLng(parseFloat(nodeInfo[0].lat), parseFloat(nodeInfo[0].lon)), 15);
 
@@ -80,12 +87,13 @@ function initMap(){
   }
 }
 
+/* Subroutine untuk menggambar path */
 function drawPath(path){
 
 }
 
 
-/* Node form routine */
+/* Subroutine untuk form pemilihan node awal-akhir */
 function handleNodePilForm(){
   let pilAwal = document.getElementsByClassName('pil-awal')[0];
   let pilAkhir = document.getElementsByClassName('pil-akhir')[0];
@@ -97,6 +105,7 @@ function handleNodePilForm(){
   } 
 }
 
+/* Subroutine untuk handling submission form pemilihan node awal-akhir */
 function handleSubmitPilForm(){
   pilAwalNode = document.getElementsByClassName('pil-awal')[0].value;
   pilAkhirNode = document.getElementsByClassName('pil-akhir')[0].value;
@@ -128,10 +137,11 @@ function handleSubmitPilForm(){
 
 //tc1, rute terpendeknya harusnya : 1 -> 5 -> 4
 
+/* Konstruksi path yang ditemukan */
 /* cameForm : Map, currNode : string */
 function reconstruct_path(cameFrom, currNode){
-  console.log(cameFrom);
-  console.log('path is found');
+ // console.log(cameFrom);
+ // console.log('path is found');
   total_path = [currNode];
   while(cameFrom.has(currNode)){
     currNode = cameFrom.get(currNode);
@@ -140,23 +150,25 @@ function reconstruct_path(cameFrom, currNode){
   return total_path;
 }
 
-/* start, goal : string, h : function */
+/* start, goal : string, h (haversineDist) : function */
 function A_Star(start, goal, h){
+  // misalkan jarak INF (tak hingga) bernilai 10^9 + 7 km
   const INF = 1000000007;
+
+  /* openSet adalah priority queue untuk menampung node-node yang aktif saat pencarian */
   openSet = new PriorityQueue();
 
-  // For node n, cameFrom[n] is the node immediately preceding it on the cheapest path from start
-  // to n currently known.
+  /* cameFrom[n] adalah node yang terhubung dengan n dengan jarak paling kecil dari node awal */
   cameFrom = new Map();
 
-  // For node n, gScore[n] is the cost of the cheapest path from start to n currently known.
+  /* gscore[n] adalah biaya termurah dari node awal ke node n */
   gScore = new Map();
-  //Initialize all gScore for all node to be Infinity
+
+  /* jarak semua node dari node awal bernilai tak hingga  */
   for(let i=0;i<adjMatrix.length;i++) gScore.set((i+1).toString(), INF);
   gScore.set(start, 0);
 
-  // For node n, fScore[n] := gScore[n] + h(n). fScore[n] represents our current best guess as to
-  // how short a path from start to finish can be if it goes through n.
+  /* fScore[n] adalah biaya yang dihitung dengan rumus gScore[n] + hScore[n], dengan h adalah fungsi heuristik */
   fScore = new Map();
   for(let i=0;i<adjMatrix.length;i++) fScore.set((i+1).toString(), INF);
   fScore.set(start, h(start));
@@ -167,22 +179,22 @@ function A_Star(start, goal, h){
   openSet.enqueue(new Node(start, fScore.get(start)));
   
   while(openSet.values.length !== 0){
-    // This operation can occur in O(1) time if openSet is a min-heap or a priority queue
-    //console.log('tes');
     currNode = openSet.values[0];
-    //console.log(currNode);
+
+    /* Ditemukannya path */
     if(currNode.value == goal)
       return reconstruct_path(cameFrom, currNode.value);
 
     openSet.dequeue();
+
+    /* untuk setiap tetangga dari node yang dievaluasi sekarang */
     for(let i=0;i<adjMatrix[parseInt(currNode.value)-1].length;i++){
-      //console.log('tes2');
       if(adjMatrix[parseInt(currNode.value)-1][i]) {
-        //console.log('tes3');
         let neighbor = (i+1).toString();
-        //console.log( currNode.value, neighbor);
+        
+        /* jika cost dari node yang dievaluasi ke tetangganya lebih kecil daripada gScorenya */
+        /* ganti keterhubungan node tetanngga dengan node sekarang */
         tentative_gScore = gScore.get(currNode.value) + graphWeight[parseInt(currNode.value)-1][parseInt(neighbor)-1];
-        //console.log('tentative_gScore: ', tentative_gScore, gScore.get(neighbor));
         if(tentative_gScore < gScore.get(neighbor)){
           cameFrom.set(neighbor, currNode.value);
           gScore.set(neighbor, tentative_gScore);
@@ -193,13 +205,13 @@ function A_Star(start, goal, h){
             });
             return false;
           }
-          if(!(isInOpenSet(neighbor))) openSet.enqueue(new Node(neighbor, fScore.get(neighbor)));
+          //mungkin akan ada duplikat, tapi nilai fScore setiap node dijamin terganti
+         openSet.enqueue(new Node(neighbor, fScore.get(neighbor)));
         }  
       }
     }
   }
-  //console.log(fScore);
-  //console.log(gScore);
+  /* tidak ditemukannya path */
   return [];
 }
 
