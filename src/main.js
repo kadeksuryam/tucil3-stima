@@ -132,12 +132,16 @@ function loadFile() {
 /* Subroutine untuk save data yang ditampilkan ke file json baru */
 function saveFile()
 {
-  let saveObject;
-  saveObject.nodeInfo = nodeInfo;
-  saveObject.adjMatrix = adjMatrix;
-  saveObject.weight = graphWeight;
+  console.log("HUHI");
+  let saveObject = {nodeInfo: nodeInfo, adjMatrix: adjMatrix, weight: graphWeight};
 
   let dataHref = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(saveObject)); 
+  let downloader = document.createElement('a');
+
+  downloader.setAttribute("href", dataHref);
+  downloader.setAttribute("download", "map.json");
+  downloader.click();
+  downloader.remove();
 }
 
 /* Subroutine untuk inisialisasi map */
