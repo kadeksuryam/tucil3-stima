@@ -121,11 +121,12 @@ function handleSubmitPilForm(){
   if(!(path.length)) elmtPath.innerHTML = '<p>Tidak ditemukannya Path</p>';
   else{
     let ansPath = "Path: ";
-    for(let i=0;i<path.length;i++){
-      if(i != path.length-1) ansPath += path[i] + ' -> ';
-      else ansPath += path[i] + '.';
+    for(let i=0;i<path[0].length;i++){
+      if(i != path[0].length-1) ansPath += path[0][i] + ' -> ';
+      else ansPath += path[0][i] + '.';
     }
     elmtPath.innerHTML = `<p>${ansPath}</p>`;  
+    elmtPath.innerHTML += `<p>Jaraknya : ${path[1]} km`
   }
 }
 
@@ -139,15 +140,16 @@ function handleSubmitPilForm(){
 
 /* Konstruksi path yang ditemukan */
 /* cameForm : Map, currNode : string */
-function reconstruct_path(cameFrom, currNode){
+function reconstruct_path(cameFrom, currNode, gScore){
  // console.log(cameFrom);
  // console.log('path is found');
+  jarak = gScore.get(currNode);
   total_path = [currNode];
   while(cameFrom.has(currNode)){
     currNode = cameFrom.get(currNode);
     total_path.unshift(currNode);
   }
-  return total_path;
+  return [total_path, jarak];
 }
 
 /* start, goal : string, h (haversineDist) : function */
@@ -183,7 +185,7 @@ function A_Star(start, goal, h){
 
     /* Ditemukannya path */
     if(currNode.value == goal)
-      return reconstruct_path(cameFrom, currNode.value);
+      return reconstruct_path(cameFrom, currNode.value, gScore);
 
     openSet.dequeue();
 
