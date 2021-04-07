@@ -335,6 +335,8 @@ function handleSubmitPilForm(){
     elmtPath.innerHTML = `<p>${ansPath}</p>`;  
     elmtPath.innerHTML += `<p>Jaraknya : ${path[1]} km`
 
+    drawPath();
+
     let latlons = [];
     for(let i = 0; i < path[0].length; i++)
     {
