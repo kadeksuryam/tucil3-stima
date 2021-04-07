@@ -59,12 +59,14 @@ window.onload = function()
       adjMatrix[i].push(0);
       graphWeight[i].push(1);
       newRow.push(0);
-      newWeight.push(1);
+      newWeight.push(Number(1));
     }
     newRow.push(1);
-    newWeight.push(0);
+    newWeight.push(Number(0));
     adjMatrix.push(newRow);
     graphWeight.push(newWeight);
+
+    console.log(graphWeight);
 
     handleNodePilForm();
     return e;
@@ -272,7 +274,7 @@ function addPath()
   adjMatrix[start][end] = 1;
   adjMatrix[end][start] = 1;
 
-  let weight = haversineDistAtoB(start, end).toFixed(3);
+  let weight = Number(haversineDistAtoB(start, end).toFixed(3));
 
   graphWeight[start][end] = weight;
   graphWeight[end][start] = weight;
@@ -480,7 +482,7 @@ function haversineDistAtoB(firstID, secondID){
   var d = R * c; 
   
   //d masih dalam km
-  return d;
+  return Number(d);
 }
 
 
