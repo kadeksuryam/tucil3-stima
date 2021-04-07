@@ -250,6 +250,26 @@ function handlePathTable()
   }
 }
 
+function addPath()
+{
+  let start = document.getElementById('selectNewPathStart').value-1;
+  let end = document.getElementById('selectNewPathEnd').value-1;
+
+  adjMatrix[start][end] = 1;
+  adjMatrix[end][start] = 1;
+
+  let weight = haversineDistAtoB(start, end).toFixed(3);
+
+  graphWeight[start][end] = weight;
+  graphWeight[end][start] = weight;
+
+  console.log(graphWeight);
+  console.log(adjMatrix);
+
+  handlePathTable();
+  drawPath();
+}
+
 /* Subroutine untuk form pemilihan node awal-akhir */
 function handleNodePilForm(){
   let newPilStart = document.getElementsByClassName('path-awal')[0];
