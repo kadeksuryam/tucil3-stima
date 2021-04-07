@@ -41,13 +41,6 @@ window.onload = function()
       handlePathTable();
     });
 
-    marker.on('mouseover', function (e) {
-      this.openPopup();
-    });
-    marker.on('mouseout', function (e) {
-        this.closePopup();
-    });
-
     markers.push(marker);
     nodeInfo.push(newNode);
 
@@ -183,13 +176,6 @@ function initMap(){
       console.log("New marker is", nodeInfo[marker.id]);
       drawPath();
       handlePathTable();
-    });
-
-    marker.on('mouseover', function (e) {
-      this.openPopup();
-    });
-    marker.on('mouseout', function (e) {
-        this.closePopup();
     });
 
     markers.push(marker);
