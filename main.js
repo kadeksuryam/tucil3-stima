@@ -318,6 +318,16 @@ function handleSubmitPilForm(){
     }
     elmtPath.innerHTML = `<p>${ansPath}</p>`;  
     elmtPath.innerHTML += `<p>Jaraknya : ${path[1]} km`
+
+    let latlons = [];
+    for(let i = 0; i < path[0].length; i++)
+    {
+      latlons.push(markers[path[0][i]-1].getLatLng());
+    }
+
+    let line = L.polyline(latlons, {color: 'red'});
+    pathlines.push(line);
+    myMap.addLayer(line);
   }
 }
 
