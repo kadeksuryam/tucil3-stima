@@ -6,6 +6,7 @@ let pilAkhirNode; //string, pilihan node akhir
 let graphWeight = []; // matrix nxn, jarak suatu node dengan tetangga-tetanggannya
 let myMap;
 
+let pathlines = [];
 let markers = [];
 
 window.onload = function()
@@ -33,9 +34,11 @@ window.onload = function()
     marker.on('dragend', function()
     {
       console.log("New lat len is", marker.getLatLng());
-      nodeInfo[marker.id].lat = marker.getLatLng().lat;
-      nodeInfo[marker.id].lng = marker.getLatLng().lng;
-      console.log("New marker is", nodeInfo[marker.id]);
+      nodeInfo[marker.id-1].lat = marker.getLatLng().lat;
+      nodeInfo[marker.id-1].lng = marker.getLatLng().lng;
+      console.log("New marker is", nodeInfo[marker.id-1]);
+      drawPath();
+      handlePathTable();
     });
 
     markers.push(marker);
@@ -57,8 +60,6 @@ window.onload = function()
     graphWeight.push(newWeight);
 
     handleNodePilForm();
-
-
     return e;
   })
 
@@ -114,11 +115,6 @@ function loadFile() {
       document.getElementsByClassName('pil-awal')[0].innerHTML = '';
       document.getElementsByClassName('pil-akhir')[0].innerHTML = '';
       document.getElementsByClassName('path')[0].innerHTML = '';
-      /* Inisialisasi map (node-node pada lan lon berkaitan ditandai) */
-      initMap();
-
-      /* handle node form */
-      handleNodePilForm();
     }
 
     /* Inisialisasi map (node-node pada lan lon berkaitan ditandai) */
@@ -126,6 +122,12 @@ function loadFile() {
 
     /* handle node form */
     handleNodePilForm();
+
+    /* handle path table */
+    handlePathTable(); 
+
+    /* draw paths */
+    drawPath();
   }
 }
 
@@ -169,9 +171,11 @@ function initMap(){
     marker.on('dragend', function()
     {
       console.log("New lat len is", marker.getLatLng());
-      nodeInfo[marker.id].lat = marker.getLatLng().lat;
-      nodeInfo[marker.id].lng = marker.getLatLng().lng;
+      nodeInfo[marker.id-1].lat = marker.getLatLng().lat;
+      nodeInfo[marker.id-1].lng = marker.getLatLng().lng;
       console.log("New marker is", nodeInfo[marker.id]);
+      drawPath();
+      handlePathTable();
     });
 
     markers.push(marker);
@@ -192,10 +196,59 @@ function initMap(){
 }
 
 /* Subroutine untuk menggambar path */
-function drawPath(path){
+function drawPath(){
+  console.log("call");
+  for(let i = 0; i < pathlines.length; i++)
+  {
+    myMap.removeLayer(pathlines[i]);
+  }
+  pathlines = [];
 
+  for(let i=0; i<adjMatrix.length; i++)
+  {
+    for(let j=0; j<i; j++)
+    {
+      if(adjMatrix[i][j] == 1)
+      {
+        let latlons = [
+          markers[i].getLatLng(),
+          markers[j].getLatLng()
+        ];
+
+        let line = L.polyline(latlons, {color: 'teal'});
+        pathlines.push(line);
+        myMap.addLayer(line);
+      }
+    }
+  }
 }
 
+function handlePathTable()
+{
+  let tableContents = document.getElementById('pathTableContents');
+  tableContents.innerHTML = '';
+  let count = 1;
+
+  for(let i=0; i<adjMatrix.length; i++)
+  {
+    for(let j=0; j<i; j++)
+    {
+      if(adjMatrix[i][j] == 1)
+      {
+        tableContents.innerHTML += 
+        `
+        <tr>
+          <th scope="row">${count}</th>
+          <td>${j+1}-${i+1}</td>
+          <td>${haversineDistAtoB(j, i).toFixed(3)} km</td>
+          <td>${graphWeight[i][j]}</td>
+        </tr>
+        `;
+        count++;
+      }
+    }
+  }
+}
 
 /* Subroutine untuk form pemilihan node awal-akhir */
 function handleNodePilForm(){
@@ -344,6 +397,31 @@ function haversineDist(currNode){
   let lon2 = nodeInfo[parseInt(pilAkhirNode)-1].lon; 
   let lat1 = nodeInfo[parseInt(currNode)-1].lat; 
   let lon1 = nodeInfo[parseInt(currNode)-1].lon; 
+  
+  var R = 6371; // km 
+
+  var x1 = lat2-lat1;
+  var dLat = x1* Math.PI / 180;  
+  var x2 = lon2-lon1;
+  var dLon = x2* Math.PI / 180;  
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) + 
+                  Math.cos(lat1* Math.PI / 180) * Math.cos(lat2* Math.PI / 180) * 
+                  Math.sin(dLon/2) * Math.sin(dLon/2);  
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  var d = R * c; 
+  
+  //d masih dalam km
+  return d;
+}
+
+function haversineDistAtoB(firstID, secondID){
+
+  console.log(nodeInfo)
+
+  let lat2 = nodeInfo[firstID].lat; 
+  let lon2 = nodeInfo[firstID].lon; 
+  let lat1 = nodeInfo[secondID].lat; 
+  let lon1 = nodeInfo[secondID].lon; 
   
   var R = 6371; // km 
 
