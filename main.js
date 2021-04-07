@@ -37,8 +37,6 @@ window.onload = function()
       nodeInfo[marker.id-1].lat = marker.getLatLng().lat;
       nodeInfo[marker.id-1].lng = marker.getLatLng().lng;
       console.log("New marker is", nodeInfo[marker.id-1]);
-
-      
       drawPath();
       handlePathTable();
     });
@@ -176,8 +174,6 @@ function initMap(){
       nodeInfo[marker.id-1].lat = marker.getLatLng().lat;
       nodeInfo[marker.id-1].lng = marker.getLatLng().lng;
       console.log("New marker is", nodeInfo[marker.id]);
-
-      
       drawPath();
       handlePathTable();
     });
@@ -225,26 +221,7 @@ function drawPath(){
       }
     }
   }
-  
-
-  // if (path.length > 0 && path[0].length > 0)
-  // {
-  //   drawSolution();
-  // }
 }
-
-// function drawSolution()
-// {
-//   let sol = [];
-//   for(let i = 0; i < path[0].length; i++)
-//   {
-//     sol.push(markers[path[0][i]-1].getLatLng());
-//   }
-
-//   let line = L.polyline(sol, {color: 'red'});
-//   pathlines.push(line);
-//   myMap.addLayer(line);
-// }
 
 function handlePathTable()
 {
@@ -264,33 +241,13 @@ function handlePathTable()
           <th scope="row">${count}</th>
           <td>${j+1}-${i+1}</td>
           <td>${haversineDistAtoB(j, i).toFixed(3)} km</td>
+          <td>${graphWeight[i][j]}</td>
         </tr>
         `;
-        graphWeight[i][j] = haversineDistAtoB(j, i).toFixed(3);
         count++;
       }
     }
   }
-}
-
-function addPath()
-{
-  let start = document.getElementById('selectNewPathStart').value-1;
-  let end = document.getElementById('selectNewPathEnd').value-1;
-
-  adjMatrix[start][end] = 1;
-  adjMatrix[end][start] = 1;
-
-  let weight = haversineDistAtoB(start, end).toFixed(3);
-
-  graphWeight[start][end] = weight;
-  graphWeight[end][start] = weight;
-
-  console.log(graphWeight);
-  console.log(adjMatrix);
-
-  handlePathTable();
-  drawPath();
 }
 
 /* Subroutine untuk form pemilihan node awal-akhir */
