@@ -349,21 +349,21 @@ function handleSubmitPilForm(){
 
 /* =========================== MAIN ALGORITHM ================================ */
 /* Implementasi A* Algorithm */
-/* fScore(n) = gScore(n) + hScore(n) */
-/* gScore(n) adalah jarak dari node awal ke node n */
+/* fCost(n) = gCost(n) + hScore(n) */
+/* gCost(n) adalah jarak dari node awal ke node n */
 /* hScore(n) adalah jarak euclidean dari node node n ke tujuan */
 
 //tc1, rute terpendeknya harusnya : 1 -> 5 -> 4
 
 /* Konstruksi path yang ditemukan */
 /* cameForm : Map, currNode : string */
-function reconstruct_path(cameFrom, currNode, gScore){
- // console.log(cameFrom);
+function reconstruct_path(parNode, currNode, gCost){
+ // console.log(parNode);
  // console.log('path is found');
-  jarak = gScore.get(currNode);
+  jarak = gCost.get(currNode);
   total_path = [currNode];
-  while(cameFrom.has(currNode)){
-    currNode = cameFrom.get(currNode);
+  while(parNode.has(currNode)){
+    currNode = parNode.get(currNode);
     total_path.unshift(currNode);
   }
   return [total_path, jarak];
@@ -374,58 +374,58 @@ function A_Star(start, goal, h){
   // misalkan jarak INF (tak hingga) bernilai 10^9 + 7 km
   const INF = 1000000007;
 
-  /* openSet adalah priority queue untuk menampung node-node yang aktif saat pencarian */
-  openSet = new PriorityQueue();
+  /* listOfActiveNode adalah priority queue untuk menampung node-node yang aktif saat pencarian */
+  listOfActiveNode = new PriorityQueue();
 
-  /* cameFrom[n] adalah node yang terhubung dengan n dengan jarak paling kecil dari node awal */
-  cameFrom = new Map();
+  /* parNode[n] adalah node yang terhubung dengan n dengan jarak paling kecil dari node awal */
+  parNode = new Map();
 
-  /* gscore[n] adalah biaya termurah dari node awal ke node n */
-  gScore = new Map();
+  /* gCost[n] adalah biaya termurah dari node awal ke node n */
+  gCost = new Map();
 
   /* jarak semua node dari node awal bernilai tak hingga  */
-  for(let i=0;i<adjMatrix.length;i++) gScore.set((i+1).toString(), INF);
-  gScore.set(start, 0);
+  for(let i=0;i<adjMatrix.length;i++) gCost.set((i+1).toString(), INF);
+  gCost.set(start, 0);
 
-  /* fScore[n] adalah biaya yang dihitung dengan rumus gScore[n] + hScore[n], dengan h adalah fungsi heuristik */
-  fScore = new Map();
-  for(let i=0;i<adjMatrix.length;i++) fScore.set((i+1).toString(), INF);
-  fScore.set(start, h(start));
+  /* fCost[n] adalah biaya yang dihitung dengan rumus gCost[n] + hScore[n], dengan h adalah fungsi heuristik */
+  fCost = new Map();
+  for(let i=0;i<adjMatrix.length;i++) fCost.set((i+1).toString(), INF);
+  fCost.set(start, h(start));
 
   //masukkan node awal ke queue
   //setiap node berbentuk objek Node {"namaNode", "priority"}
-  //priority adalah fScore
-  openSet.enqueue(new Node(start, fScore.get(start)));
+  //priority adalah fCost
+  listOfActiveNode.enqueue(new Node(start, fCost.get(start)));
   
-  while(openSet.values.length !== 0){
-    currNode = openSet.values[0];
+  while(listOfActiveNode.values.length !== 0){
+    currNode = listOfActiveNode.values[0];
 
     /* Ditemukannya path */
     if(currNode.value == goal)
-      return reconstruct_path(cameFrom, currNode.value, gScore);
+      return reconstruct_path(parNode, currNode.value, gCost);
 
-    openSet.dequeue();
+    listOfActiveNode.dequeue();
 
     /* untuk setiap tetangga dari node yang dievaluasi sekarang */
     for(let i=0;i<adjMatrix[parseInt(currNode.value)-1].length;i++){
       if(adjMatrix[parseInt(currNode.value)-1][i]) {
         let neighbor = (i+1).toString();
         
-        /* jika cost dari node yang dievaluasi ke tetangganya lebih kecil daripada gScorenya */
+        /* jika cost dari node yang dievaluasi ke tetangganya lebih kecil daripada gCostnya */
         /* ganti keterhubungan node tetanngga dengan node sekarang */
-        tentative_gScore = gScore.get(currNode.value) + graphWeight[parseInt(currNode.value)-1][parseInt(neighbor)-1];
-        if(tentative_gScore < gScore.get(neighbor)){
-          cameFrom.set(neighbor, currNode.value);
-          gScore.set(neighbor, tentative_gScore);
-          fScore.set(neighbor, gScore.get(neighbor)+h(neighbor));
-          let isInOpenSet = function(node){
-            openSet.values.forEach(element => {
+        tmp_gCost = gCost.get(currNode.value) + graphWeight[parseInt(currNode.value)-1][parseInt(neighbor)-1];
+        if(tmp_gCost < gCost.get(neighbor)){
+          parNode.set(neighbor, currNode.value);
+          gCost.set(neighbor, tmp_gCost);
+          fCost.set(neighbor, gCost.get(neighbor)+h(neighbor));
+          let isInlistOfActiveNode = function(node){
+            listOfActiveNode.values.forEach(element => {
               if(element.value === node) return true;
             });
             return false;
           }
-          //mungkin akan ada duplikat, tapi nilai fScore setiap node dijamin terganti
-         openSet.enqueue(new Node(neighbor, fScore.get(neighbor)));
+          //mungkin akan ada duplikat, tapi nilai fCost setiap node dijamin terganti
+         listOfActiveNode.enqueue(new Node(neighbor, fCost.get(neighbor)));
         }  
       }
     }
