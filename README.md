@@ -1,6 +1,6 @@
 # Tugas Kecil Strategi Algoritma 3
-> Algoritma A*
-Deployed App : https://kadeksuryam.github.io/tucil3-stima/
+> Algoritma A* <br />
+> Deployed App : https://kadeksuryam.github.io/tucil3-stima/
 
 ## Table of contents
 * [General info](#general-info)
